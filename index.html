@@ -1,0 +1,161 @@
+<!DOCTYPE html>
+<html lang="he" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>מערכת מעקב תיקונים</title>
+    <style>
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background-color: #f5f5f5;
+            margin: 0;
+            padding: 20px;
+            direction: rtl;
+        }
+        .container {
+            max-width: 500px;
+            margin: 0 auto;
+            background-color: white;
+            border-radius: 10px;
+            padding: 20px;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+        }
+        h1 {
+            color: #4285f4;
+            text-align: center;
+            margin-bottom: 20px;
+        }
+        .form-group {
+            margin-bottom: 15px;
+        }
+        label {
+            display: block;
+            margin-bottom: 5px;
+            font-weight: bold;
+        }
+        select, input {
+            width: 100%;
+            padding: 10px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            font-size: 16px;
+        }
+        button {
+            background-color: #4285f4;
+            color: white;
+            border: none;
+            padding: 12px 20px;
+            border-radius: 4px;
+            font-size: 16px;
+            cursor: pointer;
+            width: 100%;
+            margin-top: 10px;
+        }
+        button:hover {
+            background-color: #3367d6;
+        }
+        .status-repair {
+            background-color: #fbbc05;
+        }
+        .status-returned {
+            background-color: #34a853;
+        }
+        .product-info {
+            background-color: #f8f9fa;
+            padding: 15px;
+            border-radius: 5px;
+            margin-bottom: 20px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>מערכת מעקב תיקונים</h1>
+        
+        <div class="product-info">
+            <h2 id="productName">מוצר: <span id="productValue">...</span></h2>
+            <p id="productId">מספר מזהה: <span id="idValue">...</span></p>
+        </div>
+        
+        <div class="form-group">
+            <label for="status">סטטוס המוצר:</label>
+            <select id="status">
+                <option value="repair">הולך לתיקון</option>
+                <option value="returned">חזר מתיקון</option>
+            </select>
+        </div>
+        
+        <div class="form-group">
+            <label for="username">שם המשתמש במוצר:</label>
+            <input type="text" id="username" placeholder="הכנס את שם המשתמש">
+        </div>
+        
+        <div class="form-group">
+            <label for="phone">מספר טלפון לשליחת הודעה:</label>
+            <input type="tel" id="phone" placeholder="הכנס מספר טלפון כולל קידומת מדינה">
+        </div>
+        
+        <button onclick="sendWhatsApp()">שלח הודעה בוואטסאפ</button>
+    </div>
+
+    <script>
+        // פענוח פרמטרים מה-URL
+        function getUrlParams() {
+            const params = new URLSearchParams(window.location.search);
+            return {
+                product: params.get('product') || 'לא צוין',
+                id: params.get('id') || 'לא צוין',
+                defaultStatus: params.get('status') || 'repair',
+                defaultUser: params.get('user') || ''
+            };
+        }
+
+        // אתחול הדף עם הפרמטרים מה-URL
+        function initPage() {
+            const params = getUrlParams();
+            document.getElementById('productValue').textContent = params.product;
+            document.getElementById('idValue').textContent = params.id;
+            document.getElementById('status').value = params.defaultStatus;
+            document.getElementById('username').value = params.defaultUser;
+        }
+
+        // שליחת הודעת וואטסאפ
+        function sendWhatsApp() {
+            const status = document.getElementById('status').value;
+            const username = document.getElementById('username').value;
+            const phone = document.getElementById('phone').value.replace(/\D/g, ''); // להסיר תווים שאינם ספרות
+            const product = document.getElementById('productValue').textContent;
+            const productId = document.getElementById('idValue').textContent;
+            
+            if (!phone) {
+                alert('אנא הכנס מספר טלפון');
+                return;
+            }
+            
+            if (!username) {
+                alert('אנא הכנס שם משתמש');
+                return;
+            }
+            
+            const statusText = status === 'repair' ? 'הולך לתיקון' : 'חזר מתיקון';
+            
+            // יצירת הודעה מפורמטת
+            const message = `דיווח סטטוס מוצר:
+שם המוצר: ${product}
+מספר מזהה: ${productId}
+סטטוס: ${statusText}
+משתמש: ${username}
+זמן סריקה: ${new Date().toLocaleString('he-IL')}`;
+            
+            // יצירת קישור לוואטסאפ
+            const whatsappLink = `https://wa.me/${phone}?text=${encodeURIComponent(message)}`;
+            
+            // פתיחת קישור הוואטסאפ בחלון חדש
+            window.open(whatsappLink, '_blank');
+        }
+
+        // הפעלת האתחול כשהדף נטען
+        window.onload = initPage;
+    </script>
+</body>
+</html>
